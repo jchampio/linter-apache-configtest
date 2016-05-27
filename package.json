@@ -5,14 +5,23 @@
   "description": "A short description of your package",
   "keywords": [
   ],
-  "activationCommands": {
-    "atom-workspace": "linter-apache-configtest:toggle"
-  },
   "repository": "https://github.com/atom/linter-apache-configtest",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
+    "atom-package-deps": "^4.0.1",
+    "atom-linter": "^5.0.1"
+  },
+  "packageDeps": [
+    "linter"
+  ],
+  "providedServices": {
+    "linter": {
+      "versions": {
+        "1.0.0": "provideLinter"
+      }
+    }
   }
 }
