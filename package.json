@@ -2,10 +2,10 @@
   "name": "linter-apache-configtest",
   "main": "./lib/linter-apache-configtest",
   "version": "0.0.0",
-  "description": "A short description of your package",
+  "description": "Test Apache Web Server configurations using Atom's Linter",
   "keywords": [
   ],
-  "repository": "https://github.com/atom/linter-apache-configtest",
+  "repository": "https://github.com/jchampio/linter-apache-configtest",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"

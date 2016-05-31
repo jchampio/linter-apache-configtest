@@ -1,5 +1,13 @@
-# linter-apache-configtest package
+# linter-apache-configtest
 
-A short description of your package.
+This plugin for [Linter](https://github.com/AtomLinter/Linter) is a frontend to
+the configtest function of [Apache httpd](https://httpd.apache.org/docs/current/programs/httpd.html).
 
-![A screenshot of your package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+## Installation
+
+This plugin depends on the Linter package, which will automatically be
+installed for you upon activation.
+
+You'll also need a functioning installation of Apache httpd. The plugin can be
+configured to use a specific entry executable, whether that's `apachectl`,
+`httpd`, or something else entirely.
