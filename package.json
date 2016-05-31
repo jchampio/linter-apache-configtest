@@ -14,6 +14,10 @@
     "atom-package-deps": "^4.0.1",
     "atom-linter": "^5.0.1"
   },
+  "devDependencies": {
+    "eslint": "^2.11.0",
+    "babel-eslint": "^6.0.0"
+  },
   "packageDeps": [
     "linter"
   ],
@@ -22,6 +26,34 @@
       "versions": {
         "1.0.0": "provideLinter"
       }
+    }
+  },
+  "eslintConfig": {
+    "env": {
+      "es6": true,
+      "node": true
+    },
+    "extends": "eslint:recommended",
+    "globals": {
+      "atom": true
+    },
+    "parser": "babel-eslint",
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "rules": {
+      "indent": [
+        "error",
+        2
+      ],
+      "semi": [
+        "error",
+        "always"
+      ],
+      "no-unused-vars": [
+        "error",
+        { "argsIgnorePattern": "^_" }
+      ]
     }
   }
 }
