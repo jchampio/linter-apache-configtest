@@ -1,0 +1,3 @@
+httpd: Syntax error on line 3 of /tmp/example.conf: LoadModule takes two arguments, a module name and the name of a shared object file to load it from
+AH00526: Syntax error on line 15 of /tmp/example.conf:
+Invalid command 'Alias', perhaps misspelled or defined by a module not included in the server configuration

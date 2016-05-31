@@ -1,73 +1,81 @@
 'use babel';
 
-import LinterApacheConfigtest from '../lib/linter-apache-configtest';
+import * as path from 'path';
+import * as fs from 'fs';
+import ConfigTestParser from '../lib/parser';
 
-// Use the command `window:run-package-specs` (cmd-alt-ctrl-p) to run specs.
-//
-// To run a specific `it` or `describe` block add an `f` to the front (e.g. `fit`
-// or `fdescribe`). Remove the `f` to unfocus the block.
-
-describe('LinterApacheConfigtest', () => {
-  let workspaceElement, activationPromise;
-
-  beforeEach(() => {
-    workspaceElement = atom.views.getView(atom.workspace);
-    activationPromise = atom.packages.activatePackage('linter-apache-configtest');
+function readFileAsync(filename) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filename, 'utf8', (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
   });
+}
 
-  describe('when the linter-apache-configtest:toggle event is triggered', () => {
-    it('hides and shows the modal panel', () => {
-      // Before the activation event the view is not on the DOM, and no panel
-      // has been created
-      expect(workspaceElement.querySelector('.linter-apache-configtest')).not.toExist();
+describe('ConfigTestParser', () => {
+  const errorFile = path.join(__dirname, 'fixtures', 'errors.txt');
+  const successFile = path.join(__dirname, 'fixtures', 'success.txt');
 
-      // This is an activation event, triggering it will cause the package to be
-      // activated.
-      atom.commands.dispatch(workspaceElement, 'linter-apache-configtest:toggle');
+  describe('when the configtest executable fails', () => {
+    let results;
 
+    beforeEach(() => {
       waitsForPromise(() => {
-        return activationPromise;
-      });
-
-      runs(() => {
-        expect(workspaceElement.querySelector('.linter-apache-configtest')).toExist();
-
-        let linterApacheConfigtestElement = workspaceElement.querySelector('.linter-apache-configtest');
-        expect(linterApacheConfigtestElement).toExist();
-
-        let linterApacheConfigtestPanel = atom.workspace.panelForItem(linterApacheConfigtestElement);
-        expect(linterApacheConfigtestPanel.isVisible()).toBe(true);
-        atom.commands.dispatch(workspaceElement, 'linter-apache-configtest:toggle');
-        expect(linterApacheConfigtestPanel.isVisible()).toBe(false);
+        return readFileAsync(errorFile)
+          .then((errorText) => {
+            results = ConfigTestParser.parse(true, errorText);
+          });
       });
     });
 
-    it('hides and shows the view', () => {
-      // This test shows you an integration test testing at the view level.
-
-      // Attaching the workspaceElement to the DOM is required to allow the
-      // `toBeVisible()` matchers to work. Anything testing visibility or focus
-      // requires that the workspaceElement is on the DOM. Tests that attach the
-      // workspaceElement to the DOM are generally slower than those off DOM.
-      jasmine.attachToDOM(workspaceElement);
-
-      expect(workspaceElement.querySelector('.linter-apache-configtest')).not.toExist();
-
-      // This is an activation event, triggering it causes the package to be
-      // activated.
-      atom.commands.dispatch(workspaceElement, 'linter-apache-configtest:toggle');
-
-      waitsForPromise(() => {
-        return activationPromise;
-      });
-
-      runs(() => {
-        // Now we can test for view visibility
-        let linterApacheConfigtestElement = workspaceElement.querySelector('.linter-apache-configtest');
-        expect(linterApacheConfigtestElement).toBeVisible();
-        atom.commands.dispatch(workspaceElement, 'linter-apache-configtest:toggle');
-        expect(linterApacheConfigtestElement).not.toBeVisible();
+    it('returns a linter error for each line', () => {
+      expect(results.length).toBe(2);
+      results.forEach((res) => {
+        expect(res.type).toBe('Error');
       });
     });
+
+    it('correctly parses the file name from the error message', () => {
+      expect(results[0].filePath).toBe('/tmp/example.conf');
+    });
+
+    it('correctly parses the line number from the error message', () => {
+      expect(results[0].range).toBe(3);
+    });
+
+    it('correctly parses single line error descriptions', () => {
+      expect(results[0].text).toBe('LoadModule takes two arguments, a module name and the name of a shared object file to load it from');
+    });
+
+    it('correctly parses dual line error descriptions', () => {
+      expect(results[1].text).toBe("Invalid command 'Alias', perhaps misspelled or defined by a module not included in the server configuration");
+    });
   });
+
+  describe('when the configtest executable succeeds', () => {
+    let results;
+
+    beforeEach(() => {
+      waitsForPromise(() => {
+        return readFileAsync(successFile)
+          .then((successText) => {
+            results = ConfigTestParser.parse(false, successText);
+          });
+      });
+    });
+
+    it('ignores the "Syntax OK" marker', () => {
+      expect(results.length).toBe(1);
+    });
+
+    it('correctly parses each line into an informational message', () => {
+      expect(results[0].type).toBe('Info');
+      expect(results[0].text).toBe("AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message");
+    });
+  });
+
 });
